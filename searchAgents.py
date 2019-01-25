@@ -280,8 +280,8 @@ class CornersProblem(search.SearchProblem):
     Q2.1:
     You must select a suitable state space and successor function
     """
-
-    def __init__(self, startingGameState):
+    
+    def __init__(self, startingGameState, costFn = lambda x, y: 1):
         """
         Stores the walls, pacman's starting position and corners.
         """
@@ -289,6 +289,8 @@ class CornersProblem(search.SearchProblem):
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
+        self.costFn = costFn
+
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print('Warning: no food in corner ' + str(corner))
@@ -297,15 +299,15 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
 
-        print ("walls: ", self.walls)
-        print ("self.startingPosition: ", self.startingPosition)
-        print ("self.corners: ", self.corners)
+        # print ("walls: ", self.walls)
+        # print ("self.startingPosition: ", self.startingPosition)
+        # print ("self.corners: ", self.corners)
 
         self.top = top
-        print("top: ", self.top)
+        # print("top: ", self.top)
 
         self.right = right
-        print("right: ", self.right)
+        # print("right: ", self.right)
 
     def getStartState(self):
         """
@@ -317,7 +319,7 @@ class CornersProblem(search.SearchProblem):
         fourCorners = (False, False, False, False)
         startPos = (self.startingPosition, fourCorners)
 
-        print ("startPos: ", startPos)
+        # print ("startPos: ", startPos)
         return startPos
 
 
@@ -326,17 +328,27 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        # print ("state[0]: ", currPos[0])
+        # print ("state[1]: ", currPos[1])
+        # print ("state[2]: ", currPos[2])
+        # print ("state[3]: ", currPos[3])
 
         # grab (False, False, False, False) from fourCorners then check boolean to see if
-        # all visited to satisfies goal state
+        # all corners have been visited, satisfying goal state
+        cornersState = state[1]
 
-        currPos = state[1]
-        print ("state[0]: ", currPos[0])
-        print ("state[1]: ", currPos[1])
-        print ("state[2]: ", currPos[2])
-        print ("state[3]: ", currPos[3])
+        # goalState = cornersState[0] and cornersState[1] and cornersState[2] and cornersState[3]
+        
+        # return goalState
 
-        # isGoal = 
+        # print ("currPos: ", cornersState)
+        goalState = False
+
+        if cornersState[0] and cornersState[1] and cornersState[2] and cornersState[3]:
+            goalState = True
+        
+        # print ("is goal state? ", goalState)
+        return goalState
 
 
 
@@ -363,7 +375,37 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
 
+            x,y = state[0]
+            fourCorners = state[1]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            
+            reachedCorners = ()
+            nextState = (nextx, nexty)
+            cost = 1
+            # print ("reachedCorners: ", reachedCorners)
+            # print ("self.corners: ", self.corners)
+            # print ("fourCorners: ", fourCorners)
+            if not hitsWall:
+                if nextState in self.corners:
+                # reaching corners from (1,6) to (1,1) in clockwise fashion
+                    # print ("next state: ", nextState)
+                    if nextState == (self.right, 1):
+                        reachedCorners = [True, fourCorners[1], fourCorners[2], fourCorners[3]]
+                    elif nextState == (self.right, self.top):
+                        reachedCorners = [fourCorners[0], True, fourCorners[2], fourCorners[3]]
+                    elif nextState == (1, self.top):
+                        reachedCorners = [fourCorners[0], fourCorners[1], True, fourCorners[3]]
+                    elif nextState == (1,1):
+                        reachedCorners = [fourCorners[0], fourCorners[1], fourCorners[2], True]
+                    neighbours = ((nextState, reachedCorners), action, cost)
+                else:
+                    neighbours = ((nextState, fourCorners), action, cost)
+                successors.append((neighbours))
 
+                # print ("successors: ", successors)
+            
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -383,6 +425,7 @@ class CornersProblem(search.SearchProblem):
         return cost
 
 
+
 def cornersHeuristic(state, problem):
     """
     Q2.2
@@ -400,8 +443,11 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
+    print ("corners: ", corners)
+    print ("walls: ", walls)
     "*** YOUR CODE HERE ***"
 
+   
 
 def mazeDistance(point1, point2, gameState):
     """
