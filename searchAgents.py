@@ -281,7 +281,7 @@ class CornersProblem(search.SearchProblem):
     You must select a suitable state space and successor function
     """
     
-    def __init__(self, startingGameState, costFn = lambda x, y: 1):
+    def __init__(self, startingGameState):
         """
         Stores the walls, pacman's starting position and corners.
         """
@@ -289,7 +289,7 @@ class CornersProblem(search.SearchProblem):
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
-        self.costFn = costFn
+        self.costFn = lambda x, y: 1
 
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
@@ -328,20 +328,9 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        # print ("state[0]: ", currPos[0])
-        # print ("state[1]: ", currPos[1])
-        # print ("state[2]: ", currPos[2])
-        # print ("state[3]: ", currPos[3])
-
         # grab (False, False, False, False) from fourCorners then check boolean to see if
         # all corners have been visited, satisfying goal state
         cornersState = state[1]
-
-        # goalState = cornersState[0] and cornersState[1] and cornersState[2] and cornersState[3]
-        
-        # return goalState
-
-        # print ("currPos: ", cornersState)
         goalState = False
 
         if cornersState[0] and cornersState[1] and cornersState[2] and cornersState[3]:
@@ -384,13 +373,10 @@ class CornersProblem(search.SearchProblem):
             reachedCorners = ()
             nextState = (nextx, nexty)
             cost = 1
-            # print ("reachedCorners: ", reachedCorners)
-            # print ("self.corners: ", self.corners)
-            # print ("fourCorners: ", fourCorners)
+
             if not hitsWall:
                 if nextState in self.corners:
-                # reaching corners from (1,6) to (1,1) in clockwise fashion
-                    # print ("next state: ", nextState)
+                # reaching corners from (1,6) to (1,1) in counter clockwise fashion
                     if nextState == (self.right, 1):
                         reachedCorners = [True, fourCorners[1], fourCorners[2], fourCorners[3]]
                     elif nextState == (self.right, self.top):
@@ -403,8 +389,6 @@ class CornersProblem(search.SearchProblem):
                 else:
                     neighbours = ((nextState, fourCorners), action, cost)
                 successors.append((neighbours))
-
-                # print ("successors: ", successors)
             
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -443,11 +427,65 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    print ("corners: ", corners)
-    print ("walls: ", walls)
     "*** YOUR CODE HERE ***"
 
-   
+    startPos = state[0]
+    cornersState = state[1]
+
+    top, right = walls.height-2, walls.width-2  # top and right bounds - storing these values to speed up runtime
+    exploredCorner = []
+
+    # print ("corners[0]: ", corners[0])
+    # print ("corners[1]: ", corners[1])
+    # print ("corners[2]: ", corners[2])
+    # print ("corners[3]: ", corners[3])
+
+    # go through each item in corners to ensure if False, that it's appended to exploredCorner for use in manhattan distance heuristic
+    for item in corners: 
+        print ("items: ", item)
+        if item == (right, 1):
+            if cornersState[0] == False:
+                exploredCorner.append(item)
+        elif item == (right, top):
+            if cornersState[1] == False: 
+                exploredCorner.append(item)
+        elif item == (1, top):
+            if cornersState[2] == False:
+                exploredCorner.append(item)
+        elif item == (1,1):
+            if cornersState[3] == False:
+                exploredCorner.append(item)
+    
+
+    # Keep a list of Unvisited Corners - exploredCorner
+    # Return the Manhattan distance of corner that's
+    # closest to you by doing a min() over all the Manhattan distances.
+
+    totalCost = 0
+    currPosition = startPos
+
+    # check while exploredCorner still had corners to calculate manhattan distance to
+    while len(exploredCorner) > 0:
+        manDistArr = []             # list to keep track of manhattan distance from currPosition to corner
+        i = 0
+        for items in range(len(exploredCorner)):
+            corner = exploredCorner[items]
+            i += 1
+            manDistance = util.manhattanDistance(currPosition, corner)
+            manDistArr.append(manDistance)
+        minManDistance = min(manDistArr)                # taking the min of manhattan distance list to find closest corner to currPosition
+        totalCost += minManDistance
+
+        # grab index of minimum in manhattan distance array so that we can 
+        # remove the corner that corresponds to that distance from our list
+        # of explored corners from above
+
+        minManDistancePos = manDistArr.index(minManDistance)
+        currPosition = exploredCorner[minManDistancePos]
+        del exploredCorner[minManDistancePos]           # remove the corner from array in order to ensure that while loop ends
+    
+    return totalCost
+
 
 def mazeDistance(point1, point2, gameState):
     """
