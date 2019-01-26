@@ -16,7 +16,7 @@
 #####################################################
 # Please enter the number of hours you spent on this
 # assignment here
-num_hours_i_spent_on_this_assignment = 10
+num_hours_i_spent_on_this_assignment = 20
 #####################################################
 #####################################################
 
@@ -28,6 +28,19 @@ num_hours_i_spent_on_this_assignment = 10
 # course to you? (We will anonymize these before reading them.)
 """
 <Your feedback goes here>
+This course has been refreshing. I enjoy having a different focus for each of the lectures
+(where on Monday, high level concepts are explained, Wednesday, examples are done, and on Friday
+we get to apply and share our knowledge). 
+
+The most interesting topic that I've found so far has been the games and adversarial search topics 
+covered in class. 
+
+I'm still having some trouble with understanding the concepts behind state spaces. 
+
+As for improvements made to the class, I often re-watch
+lectures online and find that when participants write on the board, I can't see what they're writing
+as the camera does not focus on the white board, but rather on the projector. It would be nice to 
+have students write on the projector so what they're writing is more visible.
 
 """
 #####################################################
@@ -113,59 +126,32 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
 
-    # print ("Start: ", problem.getStartState() )
-    # print ("Is this a goal state: ", problem.isGoalState(problem.getStartState()) )
-    # print ("Starts successors: ", problem.getSuccessors(problem.getStartState()) )
 
-    # Defining the fringe using Stack to enable elements to be popped on
+    startPos = problem.getStartState()      # stores the initial position
+    currPos = problem.getStartState()       # stores the current position while going through maze
+    exploredPos = []
+    exploredPos.append(startPos)
 
-    startPos = problem.getStartState()
-    # print("initial start pos: ", startPos)
-    exploredPos = set()
-    exploredPos.add(startPos)
-
-    pushVariable = (startPos, [])
+    # Defining the fringe using Stack to enable elements to be pushed on
+    pushVariable = (startPos, [])       # where the list contains directions for pacman to move
     fringe = util.Stack()
     fringe.push(pushVariable)
-    
-    # print("Explored node position: ", exploredPos)
-    # print("Fringe contains: ", fringe)
 
-    while not fringe.isEmpty():
-        # fringe is currently root node and left child
-        # in DFS stack, second element inserted
+    while not fringe.isEmpty() and not problem.isGoalState(currPos):
         currNode, actions = fringe.pop()
-
-        if problem.isGoalState(startPos):
-            return actions
-
-        # exploredPos.add(currNode)
-        #  print ("exploredPos initial: ", exploredPos)
         successors = problem.getSuccessors(currNode)
-        # print ("successors of currNode: ", successors)
+        exploredPos.append(currPos)
 
-        # iterate through successor list and assign position to 0 and direction to 1
         for item in successors:
-            currPos = item[0]
-            print("initial startPos: ", startPos)
-            print ("successors: ", successors)
-            print("currPos: ", currPos)
-            if currPos not in exploredPos:
-                exploredPos.add(currPos)
-                # print ("exploredPos: ", exploredPos)
-                startPos = item[0]          # stores value of currPos for use in pushVariable
-                # print ("later startPos: ", startPos)
+            location = item[0]
+            if location not in exploredPos:
+                currPos = item[0]          # stores value of currPos for use in pushVariable below
                 direction = item[1]
 
-                # print ("direction", direction)
-                # print ("initial direction: ", direction)
                 returnList = actions + [direction]
-                # print("explored pos: ", exploredPos)
                 fringe.push((currPos, returnList))
-                # print ("Actions + [Direction]: ", actions + [direction])
-    # print("currNode and actions: ", currNode, actions)
-    # print("final startPos: ", startPos)
-    # print("final direction: ", direction)
+
+    return returnList
 
 
 
@@ -177,8 +163,8 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
 
     startPos = problem.getStartState()
-    exploredPos = set()
-    exploredPos.add(startPos)
+    exploredPos = []
+    exploredPos.append(startPos)
 
     pushVariable = (startPos, [])
     fringe = util.Queue()
@@ -194,13 +180,15 @@ def breadthFirstSearch(problem):
 
         for item in successors: 
             currPos = item[0]
-            if currPos not in exploredPos:
+            if not currPos in exploredPos:
                 # startPos = item[0]
                 direction = item[1]
-                exploredPos.add(currPos)
+                exploredPos.append(currPos)
                 returnList = actions + [direction]
 
                 fringe.push((currPos, returnList))
+    return actions
+
 
 
 def nullHeuristic(state, problem=None):
@@ -216,7 +204,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     "*** YOUR CODE HERE ***"
 
     startPos = problem.getStartState()
-    exploredPos = set()
+    exploredPos = []
     
     fringe = util.PriorityQueue()
     fringe.push((startPos, []), heuristic(startPos, problem))
@@ -237,8 +225,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     totalActions = actions + [directions]
                     fn = problem.getCostOfActions(totalActions) + heuristic(location, problem)
                     fringe.push((location, actions + [directions]), fn)
-        exploredPos.add(currNode)
-    # return actions
+        exploredPos.append(currNode)
+    return actions
 
 
 
