@@ -1,4 +1,4 @@
-c <_io.TextIOWrapper name='sudoku3_unsat.txt3.cnf' mode='w' encoding='UTF-8'>
+c sudoku3_unsat.txt3.cnf
 p cnf 27 93
 1 2 3 0
 4 5 6 0
@@ -90,6 +90,6 @@ p cnf 27 93
 -9 -18 0
 -9 -27 0
 -18 -27 0
-110
-70
-270
+19 0
+5 0
+27 0

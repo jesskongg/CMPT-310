@@ -90,6 +90,11 @@ def toCNF (N, instance, outputfile):
     
     final_clauses = []
 
+    # i = x coordinate
+    # j = y coordinate
+    # k = value at x,y coordinate
+    # N = size of puzzle    
+
     # Constraint 1
     # Each cell contains at least one copy of any number
 
@@ -149,36 +154,28 @@ def toCNF (N, instance, outputfile):
     # Ensure that solution matches original puzzle
     
     for y in range(0, len(instance)):
-        for x in range(0, len(instance)):
-            currentInstance = instance[x][y]
+        for x in range(0, len(instance[y])):
+            currentInstance = instance[y][x]
             if (currentInstance != 0):
-                final_clauses.append(str(assignNumber(x+1,y+1,currentInstance,N)) + "0\n")
+                final_clauses.append(str(assignNumber(x+1,y+1,currentInstance,N)) + " 0\n")
                 total_clauses += 1
     
     # Formatting CNF document
-    output_file.write("c " + str(output_file) + "\n")
+    output_file.write("c " + str(outputfile) + "\n")
     output_file.write("p cnf " + str(total_variables) + " " + str(total_clauses) + "\n")
 
     for i in range(0, len(final_clauses)-1):
         output_file.write(final_clauses[i])
     
     last_line = final_clauses[len(final_clauses)-1].strip('\n')
-    print ("LAST LINE: ", last_line)
     output_file.write(last_line)
-
-
-
 
 
     "*** YOUR CODE ENDS HERE ***"
     output_file.close()
 
-# Converts coordinates and value to index
-# i = x coordinate
-# j = y coordinate
-# k = value at x,y coordinate
-# N = size of puzzle
 
+# Converts coordinates and value to index
 def assignNumber (i, j, k, N):
     input_num = (i - 1)*(N*N) + (j - 1)*(N) + (k-1) + 1
     return input_num
